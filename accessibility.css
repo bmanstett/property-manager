@@ -1,0 +1,35 @@
+/* Retain a full, non-overlapping pointer target on compact controls. */
+button.hero-open,
+button.avatar {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.mf-tabs button {
+  min-width: 44px;
+}
+
+.chart-area {
+  grid-template-columns: 35px minmax(0, 1fr);
+  overflow-x: auto;
+}
+
+.bar-group {
+  flex: 1 0 44px;
+  min-width: 44px;
+  width: auto;
+}
+
+@media (max-width: 700px) {
+  .period-select select {
+    font-size: 1rem;
+  }
+
+  .overview-toolbar {
+    flex-wrap: wrap;
+    column-gap: 8px;
+    row-gap: 0;
+  }
+}

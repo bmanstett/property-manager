@@ -1,0 +1,443 @@
+.ls-page,
+.ls-modal {
+  --lease-ink: #213831;
+  --lease-soft: #66716a;
+  --lease-line: #e0e3dc;
+  --lease-green: #245846;
+  color: var(--lease-ink);
+  min-width: 0;
+}
+.ls-page {
+  padding-bottom: 22px;
+}
+.ls-top,
+.ls-row,
+.ls-actions,
+.ls-footer,
+.ls-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ls-top {
+  justify-content: space-between;
+  margin: 12px 0 24px;
+  flex-wrap: wrap;
+}
+.ls-top h1 {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 620;
+  letter-spacing: -0.055em;
+}
+.ls-top p,
+.ls-note {
+  color: var(--lease-soft);
+  line-height: 1.55;
+}
+.ls-top p {
+  margin: 7px 0;
+}
+.ls-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(230px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.ls-card {
+  background: #fff;
+  border: 1px solid var(--lease-line);
+  border-radius: 17px;
+  padding: 21px 23px;
+  margin-bottom: 18px;
+}
+.ls-sub h3,
+.ls-card h3 {
+  font-weight: 640;
+  font-size: 18px;
+  letter-spacing: -0.035em;
+  margin: 0 0 12px;
+}
+.ls-modal .ls-sub h3 {
+  font-size: 21px;
+}
+.ls-note {
+  margin: 8px 0 16px;
+  overflow-wrap: anywhere;
+}
+.ls-card > :last-child {
+  margin-bottom: 0;
+}
+.ls-row {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--lease-line);
+  padding: 13px 0;
+  width: 100%;
+  min-height: 56px;
+}
+.ls-row:hover .ls-rowtext b {
+  text-decoration: underline;
+}
+.ls-rowtext {
+  flex: 1;
+  min-width: 0;
+}
+.ls-row small,
+.ls-item small,
+.ls-tally small {
+  color: var(--lease-soft);
+  font-weight: 400;
+  display: block;
+  margin-top: 3px;
+}
+.ls-file {
+  display: grid;
+  place-items: center;
+  background: #e9f2e8;
+  border-radius: 10px;
+  width: 34px;
+  height: 38px;
+  color: var(--lease-green);
+  font-size: 25px;
+}
+.ls-tag {
+  display: inline-block;
+  line-height: 1.4;
+  color: #375c48;
+  background: #edf4e9;
+  font-size: 12px;
+  line-break: auto;
+  border-radius: 99px;
+  padding: 4px 9px;
+}
+.ls-row b,
+.ls-item b,
+.ls-source b {
+  overflow-wrap: anywhere;
+}
+.ls-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 9px 15px;
+  border: 1px solid #cbd3ca;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--lease-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1.35;
+}
+.ls-primary {
+  background: var(--lease-green);
+  border-color: var(--lease-green);
+  color: #fff;
+}
+.ls-btn:hover {
+  filter: brightness(0.97);
+}
+.ls-btn:disabled {
+  opacity: 0.58;
+}
+.ls-modal {
+  font-size: 14px;
+}
+.ls-modal .ls-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin-bottom: 13px;
+}
+.ls-field {
+  display: grid;
+  gap: 6px;
+  font-weight: 580;
+  font-size: 13px;
+  min-width: 0;
+  align-content: start;
+}
+.ls-field input,
+.ls-field select,
+.ls-field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid #cbd3ca;
+  border-radius: 8px;
+  background: #fff;
+  color: #25392f;
+  font: 400 16px/1.4 inherit;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+  padding: 10px 11px;
+  box-sizing: border-box;
+}
+.ls-field textarea {
+  resize: vertical;
+}
+.ls-modal > form > .ls-field,
+.ls-modal > .ls-field,
+.ls-details > div > .ls-field {
+  margin: 10px 0;
+}
+.ls-field input[type="file"] {
+  overflow: hidden;
+}
+.ls-details {
+  border-top: 1px solid var(--lease-line);
+  margin: 14px 0 0;
+}
+.ls-details > summary {
+  font-weight: 620;
+  padding: 12px 0;
+  min-height: 44px;
+  cursor: pointer;
+}
+.ls-details > div {
+  padding: 3px 0 12px;
+}
+.ls-checklist {
+  display: grid;
+  gap: 0;
+}
+.ls-checklist label {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+.ls-checklist input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--lease-green);
+}
+.ls-actions,
+.ls-footer {
+  flex-wrap: wrap;
+}
+.ls-footer {
+  border-top: 1px solid var(--lease-line);
+  padding-top: 14px;
+  margin-top: 19px;
+  justify-content: flex-end;
+}
+.ls-steps {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--lease-line);
+  margin: 0 0 22px;
+  padding-bottom: 9px;
+}
+.ls-steps button {
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 560;
+  font-size: 13px;
+  color: #56655c;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px;
+  cursor: pointer;
+}
+.ls-steps [aria-current="step"] {
+  background: #eaf3e9;
+  color: var(--lease-green);
+  border-radius: 8px;
+}
+.ls-paper {
+  background: white;
+  border: 1px solid #dddcd0;
+  padding: clamp(15px, 4vw, 38px);
+  font:
+    16px/1.5 Georgia,
+    serif;
+  margin: 15px 0;
+}
+.ls-paper h2 {
+  font:
+    600 26px/1.15 Georgia,
+    serif;
+}
+.ls-paper h3 {
+  font:
+    600 18px/1.3 Georgia,
+    serif;
+  border-bottom: 1px solid #d7dcd5;
+}
+.ls-paper p,
+.ls-source p {
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+.ls-paper-mark {
+  font: 600 10px/1.5 sans-serif;
+  letter-spacing: 0.14em;
+  color: #45654e;
+}
+.ls-source {
+  padding: 12px 0;
+  border-top: 1px solid var(--lease-line);
+}
+.ls-source b {
+  display: block;
+  margin: 7px 0;
+}
+.ls-source p {
+  margin: 6px 0;
+  line-height: 1.55;
+}
+.ls-source a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #275e4c;
+  text-decoration: underline;
+}
+.ls-item,
+.ls-tally,
+.ls-call {
+  padding: 10px 12px;
+  border: 1px solid var(--lease-line);
+  border-radius: 10px;
+  background: #f5f7f2;
+  margin: 8px 0;
+}
+.ls-tally {
+  margin: 0;
+}
+.ls-tally strong {
+  font-size: 21px;
+}
+.ls-call {
+  background: #edf4ec;
+}
+.ls-error {
+  color: #8a3024;
+  background: #fff1ed;
+  padding: 10px;
+  border-radius: 8px;
+}
+.ls-modal ul {
+  padding-inline-start: 20px;
+}
+.ls-modal li {
+  margin: 7px 0;
+}
+.ls-modal button:focus-visible,
+.ls-modal a:focus-visible,
+.ls-page button:focus-visible,
+.ls-modal input:focus-visible,
+.ls-modal select:focus-visible,
+.ls-modal textarea:focus-visible,
+.ls-modal summary:focus-visible {
+  outline: 3px solid #528c6c;
+  outline-offset: 2px;
+}
+@media (max-width: 850px) {
+  .ls-columns {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .ls-card {
+    padding: 16px;
+  }
+  .ls-modal .ls-grid {
+    grid-template-columns: 1fr;
+  }
+  .ls-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ls-steps button {
+    padding: 4px;
+  }
+  .ls-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ls-rowtext {
+    min-width: 110px;
+  }
+  .ls-info {
+    flex-wrap: wrap;
+  }
+  .ls-actions,
+  .ls-footer {
+    gap: 8px;
+  }
+  .ls-page .ls-tag {
+    font-size: 11px;
+  }
+  .ls-source a {
+    overflow-wrap: anywhere;
+  }
+  .ls-modal .ls-details {
+    min-width: 0;
+  }
+}
+@media print {
+  @page {
+    size: letter;
+    margin: 0.72in;
+  }
+  body:has(.ls-paper) {
+    overflow: visible !important;
+    height: auto !important;
+    background: white !important;
+  }
+  body:has(.ls-paper) > :not(dialog) {
+    display: none !important;
+  }
+  body:has(.ls-paper) dialog,
+  body:has(.ls-paper) .dialog-inner,
+  body:has(.ls-paper) #dialog-body {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body:has(.ls-paper) dialog::backdrop {
+    background: transparent;
+  }
+  body:has(.ls-paper) .dialog-header,
+  .ls-modal:has(.ls-paper) > :not(.ls-paper) {
+    display: none !important;
+  }
+  .ls-paper {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font-size: 11pt;
+  }
+  .ls-paper h2,
+  .ls-paper h3 {
+    break-after: avoid;
+  }
+  .ls-paper section:last-child {
+    break-inside: avoid;
+  }
+}

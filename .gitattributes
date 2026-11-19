@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+pdf-font.js -text
+dist/** -text
+*.png binary
+*.pdf binary
+*.zip binary
