@@ -1,13 +1,20 @@
-/* The token and decrypted vault stay on the device. Only ciphertext is committed. */
+/* The decrypted vault stays on the device. Only ciphertext is committed, and the access key is sent
+   only to GitHub's API. */
 (() => {
   "use strict";
   const limit = 100_000_000;
   const path = "property-manager/owner.pmvault";
+  const api = "https://api.github.com";
   const jsonType = "application/vnd.github+json";
+  /* Messages are written for the owner. `code` tells the panel what a message is about:
+     "key" the access key itself, "repository" which repository, "access" what the key may do. */
+  const problem = (message, code) => Object.assign(Error(message), {code});
+  const changed = "Something about the repository changed. Check its name and settings on GitHub, then sync again.";
+  const unfinished = "The transfer did not finish cleanly. Sync again.";
 
   function checkSize(size) {
     if (!Number.isSafeInteger(size) || size < 32 || size > limit)
-      throw Error("GitHub sync supports encrypted vaults up to 100 MB. Use an encrypted file transfer for a larger workspace.");
+      throw Error("Your records are larger than the 100 MB that sync allows. Use a backup file instead.");
   }
 
   async function asBase64(blob, signal) {
@@ -22,17 +29,24 @@
     return chunks.join("");
   }
 
-  async function connect(repository, token, signal) {
-    const parts = repository.trim().split("/");
-    if (parts.length !== 2 || !/^[a-z0-9-]+$/i.test(parts[0]) ||
-        !/^[a-z0-9_.-]+$/i.test(parts[1]) || [".", ".."].includes(parts[1]))
-      throw Error("Enter a GitHub repository as owner/repository.");
-    if (!/^github_pat_[a-z0-9_]+$/i.test(token))
-      throw Error("Enter a fine-grained GitHub personal access token.");
-    const base = "https://api.github.com/repos/" + parts.join("/");
+  /* "name/repository" as its two parts, or null when it is not written that way. */
+  function nameParts(repository) {
+    const parts = String(repository ?? "").trim().split("/");
+    return parts.length === 2 && /^[a-z0-9-]+$/i.test(parts[0]) &&
+      /^[a-z0-9_.-]+$/i.test(parts[1]) && ![".", ".."].includes(parts[1]) ? parts : null;
+  }
+  const looksLikeKey = token => /^github_pat_[a-z0-9_]+$/i.test(String(token ?? ""));
+  function checkKey(token) {
+    if (!looksLikeKey(token))
+      throw problem("That does not look like a GitHub access key. It should start with github_pat_.", "key");
+  }
 
-    async function request(suffix, signal, {body, accept = jsonType, allowMissing = false} = {}) {
-      const response = await fetch(base + suffix, {
+  /* One request to GitHub. `missing` lists the answers that mean "not there" instead of a failure;
+     for those the result is null. */
+  async function call(url, token, signal, {body, accept = jsonType, missing = []} = {}) {
+    let response;
+    try {
+      response = await fetch(url, {
         method: body ? "PUT" : "GET", cache: "no-store", credentials: "omit",
         referrerPolicy: "no-referrer", redirect: "error", signal,
         headers: {
@@ -42,22 +56,62 @@
         },
         ...(body ? {body: JSON.stringify(body)} : {}),
       });
-      if (response.ok) return response;
-      if (response.status === 404 && allowMissing) return null;
-      if (response.status === 409 || response.status === 422)
-        throw Error("GitHub declined this revision. Check the branch rules and reopen GitHub sync to compare the latest changes.");
-      if ([401, 403, 404].includes(response.status))
-        throw Error("GitHub denied access. Check the repository, token expiry, repository access and Contents permission.");
-      throw Error("GitHub returned HTTP " + response.status + ". Reopen sync to check the latest snapshot before retrying.");
+    } catch (error) {
+      // Stopping is passed on as it is.
+      if (error?.name === "AbortError" || signal?.aborted) throw error;
+      // A download that fails changed nothing. An upload may have arrived before the connection dropped.
+      throw problem(body
+        ? "The connection to GitHub dropped during the upload, so the online copy may or may not have been updated. Nothing on this device was lost. Sync again to check."
+        : "Could not reach GitHub. Check your internet connection and try again. Nothing was changed.", "offline");
     }
+    if (response.ok) return response;
+    // GitHub answers 401 only when the key itself is no good: mistyped, expired or deleted.
+    if (response.status === 401)
+      throw problem("GitHub did not accept the access key. It may have expired or been deleted. Create a new key on GitHub and paste it here.", "key");
+    if (missing.includes(response.status)) return null;
+    if (response.status === 409 || response.status === 422)
+      throw problem("GitHub did not accept the upload, usually because your other device synced a moment ago. Sync again.", "busy");
+    if ([403, 404].includes(response.status))
+      throw problem("GitHub did not let the app in. Check that the repository name is right and that the access key allows Contents: Read and write for that repository.", "access");
+    throw Error("GitHub had a problem (error " + response.status + "). " + (body ? "The upload may not have gone through. Sync again in a few minutes to check." : "Nothing was changed. Try again in a few minutes."));
+  }
+
+  /* The private repositories an access key can open, most recently used first, or null when GitHub
+     will not list them for this key. A key made for one repository lists only that one, which is
+     how the app learns where to sync without being told. */
+  async function find(token, signal) {
+    checkKey(token);
+    const response = await call(api + "/user/repos?visibility=private&sort=pushed&per_page=100", token, signal, {missing: [403, 404]});
+    if (!response) return null;
+    const list = await response.json();
+    return (Array.isArray(list) ? list : [])
+      .filter(repo => repo?.private === true && nameParts(repo.full_name))
+      .map(repo => repo.full_name);
+  }
+
+  /* Whether a repository already holds an online backup. */
+  async function holds(repository, token, signal) {
+    const parts = nameParts(repository);
+    checkKey(token);
+    return !!parts && !!(await call(api + "/repos/" + parts.join("/") + "/contents/" + path, token, signal, {missing: [403, 404]}));
+  }
+
+  async function connect(repository, token, signal) {
+    const parts = nameParts(repository);
+    if (!parts)
+      throw problem("Type the repository as name/repository, for example pat-smith/rental-backup.", "repository");
+    checkKey(token);
+    const base = api + "/repos/" + parts.join("/");
+    const request = (suffix, signal, {allowMissing = false, ...options} = {}) =>
+      call(base + suffix, token, signal, {...options, missing: allowMissing ? [404] : []});
 
     async function verifyRepository(signal) {
       const repo = await (await request("", signal)).json();
       if (repo.private !== true || repo.visibility !== "private" || repo.has_pages !== false)
-        throw Error("Use a private data repository with GitHub Pages turned off. Publish the app from its separate hosting repository.");
+        throw problem("For your privacy, sync needs a private repository with GitHub Pages turned off. Check the repository's settings on GitHub.", "repository");
       if (repo.full_name?.toLowerCase() !== parts.join("/").toLowerCase() ||
           !Number.isSafeInteger(repo.id) || !repo.default_branch)
-        throw Error("GitHub returned an unexpected repository. Reopen sync with its current owner and name.");
+        throw problem(changed, "repository");
       return repo;
     }
     const repo = await verifyRepository(signal);
@@ -67,39 +121,39 @@
     const metadata = response ? await response.json() : null;
     if (metadata) {
       if (metadata.type !== "file" || metadata.path !== path || !/^[0-9a-f]{40}$/.test(metadata.sha))
-        throw Error("The sync path contains an unexpected file. Check the data repository.");
+        throw Error(changed);
       checkSize(metadata.size);
     }
     return {
       repository: repo.full_name,
       exists: !!metadata,
       async download(signal) {
-        if (!metadata) throw Error("This repository has no owner snapshot yet. Sync your source device first.");
+        if (!metadata) throw Error("There is no online backup in this repository yet. Sync from the device that has your records first.");
         const raw = await request("/git/blobs/" + metadata.sha, signal, {accept: "application/vnd.github.raw+json"});
         const blob = await raw.blob();
-        if (blob.size !== metadata.size) throw Error("The downloaded vault is incomplete. Reopen sync to retry.");
+        if (blob.size !== metadata.size) throw Error(unfinished);
         return blob;
       },
       async upload(blob, signal) {
         checkSize(blob.size);
         if (await blob.slice(0, 8).text() !== "PMVAULT2")
-          throw Error("GitHub sync requires an encrypted Property Manager backup.");
+          throw Error("Only a Property Manager backup can be uploaded.");
         const content = await asBase64(blob, signal);
         const header = "blob " + blob.size + "\0";
         const digest = await crypto.subtle.digest("SHA-1", await new Blob([header, blob]).arrayBuffer());
         const expected = Array.from(new Uint8Array(digest), n => n.toString(16).padStart(2, "0")).join("");
         const current = await verifyRepository(signal);
         if (current.id !== repo.id || current.default_branch !== repo.default_branch)
-          throw Error("The data repository or default branch changed. Reopen sync to review it.");
+          throw Error(changed);
         const written = await request(file, signal, {body: {
           message: "Sync encrypted Property Manager vault", branch: repo.default_branch, content,
           ...(metadata ? {sha: metadata.sha} : {}),
         }});
         const receipt = await written.json();
         if (receipt.content?.sha !== expected || receipt.content?.path !== path)
-          throw Error("GitHub did not confirm the expected vault bytes. Reopen sync to check the saved revision.");
+          throw Error(unfinished);
       },
     };
   }
-  globalThis.GitHubSync = {connect};
+  globalThis.GitHubSync = {connect, find, holds, looksLikeKey};
 })();

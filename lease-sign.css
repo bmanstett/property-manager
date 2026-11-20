@@ -1,0 +1,536 @@
+/* Signing page, lease history and deposit return. Built on the tokens and components in ui.css. */
+
+/* ---- The lease page ---- */
+.lp-page {
+  display: grid;
+  gap: var(--s4);
+  max-width: 860px;
+  min-width: 0;
+  color: var(--ink);
+  font-family: var(--font);
+}
+.lp-page :focus-visible,
+.lp-dialog :focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.lp-page button,
+.lp-dialog button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.lp-back {
+  justify-self: start;
+  gap: 6px;
+  margin: -6px 0 -6px -8px;
+  padding: 8px 12px 8px 8px;
+  font-size: var(--t-sm);
+}
+.lp-back svg {
+  transform: rotate(180deg);
+}
+.lp-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s2) var(--s4);
+}
+.lp-head-text {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.lp-page h1 {
+  margin: 0;
+  font: 400 clamp(1.7rem, 2.6vw, 2.3rem) / 1.15 var(--serif);
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+.lp-page h1:focus,
+.lp-page h1:focus-visible {
+  outline: none;
+}
+.lp-sub {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: var(--t-sm);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.lp-head .ui-status {
+  margin-top: 8px;
+  padding: 5px 12px;
+  font-size: var(--t-sm);
+}
+.lp-state {
+  margin: 0;
+  font-size: var(--t-md);
+  line-height: 1.5;
+}
+
+/* ---- Cards and the numbered checklist ---- */
+.lp-card {
+  min-width: 0;
+  padding: var(--s5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+.lp-card h2 {
+  margin: 0 0 var(--s2);
+  font: 400 var(--t-lg) / 1.25 var(--serif);
+  letter-spacing: -0.02em;
+}
+.lp-card > .ui-more {
+  border-top: 0;
+}
+.lp-card.lp-fold {
+  padding-top: var(--s2);
+  padding-bottom: var(--s2);
+}
+.lp-fold .ui-more-body {
+  padding-bottom: var(--s2);
+}
+.lp-help {
+  margin: 0 0 var(--s3);
+  color: var(--muted);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+.lp-steps {
+  display: grid;
+  gap: var(--s4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lp-step {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: var(--s4);
+  align-items: start;
+}
+.lp-num {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--sage);
+  color: var(--deep);
+  font: 600 1rem / 1 var(--font);
+}
+.lp-step-body {
+  display: grid;
+  gap: var(--s3);
+  min-width: 0;
+}
+.lp-step-body > h2 {
+  margin: 0;
+  padding-top: 5px;
+}
+.lp-step-body > .lp-help {
+  margin: 0;
+}
+.lp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.lp-aside {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3) var(--s4);
+  align-items: center;
+  justify-content: space-between;
+}
+.lp-aside > div {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.lp-aside h2 {
+  margin-bottom: 4px;
+  font-size: 1.125rem;
+}
+.lp-aside .lp-help {
+  margin: 0;
+}
+
+/* ---- Lists: files, reminders, next steps ---- */
+.lp-files,
+.lp-list,
+.lp-choices,
+.lp-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lp-file {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.lp-file:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.lp-file-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--sage);
+  color: var(--green);
+}
+.lp-file-icon.lp-done {
+  background: var(--green);
+  color: #fff;
+}
+.lp-file-text {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.lp-file-text b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.lp-file-text small,
+.lp-item-text small {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.lp-file button {
+  flex: none;
+}
+.lp-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px var(--s4);
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.lp-list li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.lp-list b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.lp-list small {
+  color: var(--muted);
+  font-size: var(--t-sm);
+}
+.lp-list + .lp-actions {
+  margin-top: var(--s4);
+}
+.lp-choices {
+  margin: 0 -8px -8px;
+}
+.lp-choices li + li {
+  border-top: 1px solid var(--line);
+}
+.lp-choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: var(--r-control);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lp-choice:hover {
+  background: var(--sage);
+}
+.lp-choice-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.lp-choice-text b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.lp-choice-text small {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.lp-choice svg {
+  flex: none;
+  color: var(--muted);
+}
+.lp-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--s3) var(--s5);
+  margin: var(--s2) 0 var(--s4);
+}
+.lp-facts div {
+  min-width: 0;
+}
+.lp-facts dt {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.lp-facts dd {
+  margin: 2px 0 0;
+  font-size: var(--t-md);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Forms and messages ---- */
+.lp-form {
+  margin-top: var(--s1);
+}
+.lp-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--r-control);
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  line-height: 1.45;
+}
+.lp-page .ui-note > div,
+.lp-dialog .ui-note > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---- Dialogs: add a lease, return a deposit ---- */
+.lp-dialog {
+  display: grid;
+  gap: var(--s4);
+  min-width: 0;
+  color: var(--ink);
+}
+#dialog-body .lp-dialog p,
+#dialog-body .lp-dialog h3,
+#dialog-body .lp-dialog li {
+  margin: 0;
+}
+#dialog-body .lp-dialog ul {
+  padding-left: 0;
+}
+#dialog-body .lp-dialog .ui-note p + p {
+  margin-top: 6px;
+}
+.lp-lead {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.lp-read {
+  display: grid;
+  gap: 4px;
+}
+.lp-read span {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.lp-read b {
+  font-size: var(--t-md);
+  font-weight: 400;
+}
+.lp-deadline {
+  display: grid;
+  gap: 2px;
+  padding: var(--s4) var(--s5);
+  border-radius: var(--r-card);
+  background: var(--sage);
+}
+.lp-deadline--due {
+  background: var(--amber);
+}
+.lp-deadline-label,
+.lp-deadline-help {
+  color: var(--deep);
+  font-size: var(--t-sm);
+  line-height: 1.45;
+}
+.lp-deadline--due .lp-deadline-label,
+.lp-deadline--due .lp-deadline-help {
+  color: var(--amber-ink);
+}
+.lp-deadline-date {
+  color: var(--ink);
+  font: 400 1.75rem / 1.2 var(--serif);
+  letter-spacing: -0.02em;
+}
+.lp-section {
+  display: grid;
+  gap: var(--s3);
+  min-width: 0;
+}
+.lp-section h3 {
+  font: 400 var(--t-lg) / 1.25 var(--serif);
+  letter-spacing: -0.02em;
+}
+.lp-section .lp-help {
+  margin: 0;
+}
+.lp-items {
+  border: 1px solid var(--line);
+  border-radius: var(--r-control);
+  background: var(--surface);
+}
+.lp-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-height: 56px;
+  padding: 6px 6px 6px 14px;
+  border-top: 1px solid var(--line);
+}
+.lp-item:first-child {
+  border-top: 0;
+}
+.lp-item--empty {
+  padding-right: 14px;
+  color: var(--muted);
+  font-size: var(--t-sm);
+}
+.lp-item-text {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.lp-item-text b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.lp-item-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.lp-item-amount--off {
+  color: var(--muted);
+  font-weight: 400;
+  text-decoration: line-through;
+}
+.lp-add {
+  display: grid;
+  gap: var(--s4);
+  min-width: 0;
+  margin: 0;
+  padding: var(--s4);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-card);
+}
+.lp-add > legend {
+  padding: 0 6px;
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+.lp-add .ui-more {
+  border-top: 0;
+}
+.lp-totals {
+  padding: var(--s4) var(--s5);
+  border-radius: var(--r-card);
+  background: var(--sage);
+}
+.lp-totals-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+.lp-totals-list div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px var(--s4);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.lp-totals-list dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.lp-totals-list .lp-total {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-strong);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+.lp-summary {
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+}
+.lp-summary .lp-help {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .lp-card {
+    padding: var(--s4);
+  }
+  .lp-step {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: var(--s3);
+    align-items: center;
+  }
+  .lp-num {
+    width: 32px;
+    height: 32px;
+  }
+  .lp-step-body {
+    display: contents;
+  }
+  .lp-step-body > * {
+    grid-column: 1 / -1;
+  }
+  .lp-step-body > h2 {
+    grid-column: 2;
+    padding-top: 0;
+  }
+  .lp-file-icon:not(.lp-done) {
+    display: none;
+  }
+  .lp-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .lp-deadline,
+  .lp-totals {
+    padding: var(--s4);
+  }
+  .lp-deadline-date {
+    font-size: 1.5rem;
+  }
+  .lp-add {
+    padding: var(--s3);
+  }
+}

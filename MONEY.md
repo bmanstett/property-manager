@@ -1,26 +1,28 @@
 # Money and CPA records
 
-Property Manager keeps each household’s monthly rent obligation separate from its receipts. An opening refundable deposit carries a liability forward. Its effective date comes from the balance-as-of field when supplied, or the setup date. The initial entry contributes zero income and zero cash movement.
+The Money section keeps what your tenant owes each month separate from what they have paid, so you can always see who owes what. A security deposit is tracked as the tenant's money, never as income, until you keep or return it.
 
-## Posting and reviewing entries
+## Everyday entries
 
-- **Record payment** records the cash receipt date. Enter amounts against one or more open months, then review the unapplied balance. In **Money → Rent → Unapplied credit**, select a payment to apply its remaining credit. Reopening the app catches up monthly charges through the next billing month.
-- **Add expense** records the vendor, accounting date, total, account, business purpose, category splits, and attachments. A single split can use the entire amount. Multiple split amounts must total the invoice. A split can belong to another property in the same dataset.
-- **Photograph receipt** accepts the device camera, photo library, or a selection of images and PDFs. Originals are retained in the receipt inbox as each file commits. Close and reopen the expense form during the same session to resume its text. After a restart, select an inbox item to finish posting. The expense can include several originals.
-- Open a posted expense to **Correct categories** or **Link receipts**. Each category correction retains its earlier values, reason, and time. Use **Record reversal** for a full dated correction. Vendor refunds can also be posted as separate dated receipts against expense categories. A write-off requires an explicit charge allocation and reason.
-- Open the original rent receipt and choose **Refund or return rent**. Enter the actual return date and amount, identify any rent allocations to reopen, and document the reference. You can return part of a receipt, multiple times, up to the remaining allocated and unapplied amounts. The original receipt stays in its receipt year. The return appears as a separate entry in its actual year. Cross-year returns are also listed for CPA review.
-- A documented rent change updates eligible future obligations under their existing monthly IDs. Ending a tenancy cancels unallocated obligations due after the confirmed end date. Extending the tenancy can reinstate a canceled future period. Open **Money → Rent → Rent schedule history** for each affected period, previous and revised amounts, effective date and reason. Historical or payment-linked charges require separate review before a schedule edit can proceed.
-- **Money → Deposits** records receipts, refunds, adjustments, and applications. A rent application must allocate the exact liability reduction to a charge. It recognizes income without a second cash receipt. For a retained amount with uncertain tax treatment, select the review classification.
-- For a mortgage, choose **Mortgage payment** and split the total among principal, interest, and escrow. Record an actual tax or insurance payment from escrow as **Escrow tax / insurance disbursement**. Use **Credit-card purchase** when recognizing an expense paid by card, and the **Credit-card balance payment** category for the later payment of the bill.
-- **Reports → Reporting details** retains ownership, rental-use and personal-use data for the chosen year and property. The export presents full property amounts and provides these facts for the CPA’s allocation. Capital costs, insurance recoveries, reimbursements, and uncertain classification remain visible for review.
+- **Record rent** asks for the amount, the date the money reached you and how it was paid. The amount is filled in from what is owed and applied to the oldest unpaid month first. **More options** holds the account it went into, a note, and **Choose months yourself** for a payment meant for a particular month. Anything left over is kept as a credit toward future rent. It appears on the **Rent** tab under **Credit not yet applied**, where you can apply it to a month.
+- **Add expense** asks who you paid, how much, when and what it was for. Pick a category pill, or **Not sure** and let your CPA decide. **More options** covers the less common cases: paying by credit card, splitting one bill between categories, miles driven, and the install date of a large purchase.
+- **Snap a receipt** takes a photo or accepts a saved file. The original is stored the moment you choose it, so you can fill in the details later. One expense can hold several receipts.
+- **Other entry** lists the things you record only now and then: a mortgage payment (split into principal, interest and escrow), a refund from a vendor, other money in, a bill your tenant paid for you, tax or insurance your lender paid from escrow, a depreciation figure from your CPA, a security deposit change, and forgiving unpaid rent.
+
+## Looking things up and fixing them
+
+- **Activity** lists everything recorded in the year. Open a line to see it in plain words. From there, **Change category** keeps the earlier category in the history, **Add a receipt** attaches one, **Undo this entry** adds an opposite entry and keeps the original, and **Undo and enter again** opens a new form with the same details. On a rent payment, **Refund rent** records money you gave back, on the date you gave it.
+- **Rent** shows each month's charge and whether it is paid. **Rent changes** lists every change with its date and reason. To change the rent, choose **Change rent** on Home. Months already paid are never repriced.
+- **Deposit** shows what you hold for each tenant, with **Deposit received**, **Return deposit** and **Other change**. Applying part of a deposit to unpaid rent counts as income without a second cash receipt.
+- Nothing is ever erased. A correction is a new dated entry, so a packet you already sent to your CPA still matches the records behind it.
 
 ## Bank statements
 
-Import a CSV from **Money → Reconciliation**. Select a date format and map the date, description, signed dollar amount, and optional unique bank identifier. An inflow is positive. Use a single account per file. The preview validates every line before import. Files can contain up to 5,000 activity rows and 2 MiB.
+The **Bank** tab is optional. It checks your records against your bank in three steps.
 
-Each line has a stable identity based on property, account, and the supplied bank identifier, or on the file hash and source row. Repeating the same import skips entries already present. A changed CSV without bank identifiers may represent the same activity under new file identities. Review the possible duplicates before matching. Matching links a bank line to a separately posted ledger entry. An owner confirmation is required even for identical amounts and dates.
-
-The reconciliation form selects a statement period and account. Check the cleared ledger entries and enter the actual opening and closing balances. A difference requires an explanation. The reconciliation retains the cleared IDs, imported net, balances, and difference as a snapshot. A period that overlaps an existing statement for the account is rejected.
+1. **Import your bank file.** Download a CSV from your bank's website. The app works out which columns hold the date, description and amount and shows a preview; choose **Columns look wrong? Change them** if it guessed wrong. Use one account per file. The preview checks every line before anything is saved. A file can hold up to 5,000 lines and 2 MiB.
+2. **Match transactions.** Each bank line is matched to an entry you recorded. You confirm every match, even when the amount and date are identical. Importing the same file again adds nothing twice.
+3. **Check the statement balance.** Pick the statement period, tick the entries that appear on it and enter the opening and closing balances. A difference needs an explanation. A saved check cannot be changed later, and a period that overlaps an earlier check for the same account is refused.
 
 ## Reporting assumptions and source register
 
@@ -37,11 +39,11 @@ The IRS Schedule E page and instructions available during research pointed to th
 
 ## CPA ZIP
 
-**Prepare CPA packet** lets you choose the property and calendar year, inspect outstanding questions, and select supporting files. A preliminary packet includes a review list. A property’s transaction splits, monthly results, tax categories, bank statements, deposits, capital costs, mortgage components, travel, and ownership/use information have dedicated CSVs. Monetary CSV columns use signed integer cents. The annual summary is a selectable-text U.S. Letter PDF.
+**Tax time → Year-end packet for my CPA** asks for the tax year, shows the totals and a short list of things to double-check, and lets you choose which receipts and documents to include. You can create the packet with open questions; they are listed inside it for your CPA. **Ownership and rental days** on the same tab holds the facts your CPA needs to divide the figures. A property’s transaction splits, monthly results, tax categories, bank statements, deposits, capital costs, mortgage components, travel, and ownership/use information have dedicated CSVs. Monetary CSV columns use signed integer cents. The annual summary is a selectable-text U.S. Letter PDF.
 
 The report distinguishes the operating result from checking/cash movement. Cash movement recognizes the mortgage payment, including escrow funding, and the later payment of a credit-card balance. The operating expense subtotal recognizes eligible underlying costs. It excludes principal, internal transfers, and capital purchases. Accumulated depreciation and ownership/use adjustments remain separate.
 
-The packet includes linked financial evidence by default. Unrelated tenant files stay outside the packet. Owners can explicitly add other retained financial files in review. The archive manifest identifies its contents and a fingerprint of source record revisions. A retained immutable ZIP can be downloaded again from **Reports**. Subsequent corrections produce a separate snapshot.
+The packet includes linked financial evidence by default. Unrelated tenant files stay outside the packet. Owners can explicitly add other retained financial files in review. The archive manifest identifies its contents and a fingerprint of source record revisions. Every packet you make is kept and can be downloaded again under **Packets you have made**. Subsequent corrections produce a separate snapshot.
 
 ## Verification
 

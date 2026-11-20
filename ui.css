@@ -1,0 +1,508 @@
+/* Shared design tokens and form components. Loaded first; every stylesheet builds on these. */
+:root {
+  --ink: #202e28;
+  --muted: #59645b;
+  --line: #dedfd6;
+  --line-strong: #869282;
+  --green: #285440;
+  --green-hover: #1b402e;
+  --deep: #18382f;
+  --paper: #f7f7f2;
+  --surface: #fffefa;
+  --sage: #e6eee3;
+  --amber: #f5e5bc;
+  --amber-ink: #6f531e;
+  --error: #872f27;
+  --error-bg: #fbece8;
+  --focus: #a6641a;
+  --r-control: 8px;
+  --r-card: 14px;
+  --r-dialog: 18px;
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --t-xs: 0.75rem;
+  --t-sm: 0.875rem;
+  --t-md: 1rem;
+  --t-lg: 1.25rem;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
+}
+
+/* ---- Field: label, one line of help, control, error ---- */
+.ui-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  align-content: start;
+}
+.ui-label,
+.ui-field > label,
+.ui-group > legend {
+  display: block;
+  padding: 0;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.ui-opt {
+  font-weight: 400;
+  color: var(--muted);
+}
+.ui-help {
+  margin: -3px 0 0;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.ui-field input,
+.ui-field select,
+.ui-field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  background: #fff;
+  color: var(--ink);
+  font: 400 1rem/1.4 var(--font);
+}
+.ui-field textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+.ui-field input::placeholder,
+.ui-field textarea::placeholder {
+  color: #6f7a71;
+}
+.ui-affix {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  background: #fff;
+  overflow: hidden;
+}
+.ui-affix > span {
+  display: grid;
+  place-items: center;
+  padding: 0 0 0 12px;
+  color: var(--muted);
+  font-size: 1rem;
+}
+.ui-affix > span:last-child {
+  padding: 0 12px 0 0;
+}
+.ui-affix input {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.ui-affix:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.ui-affix input:focus-visible {
+  outline: none;
+}
+.ui-error {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--r-control);
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+.ui-field.is-invalid input,
+.ui-field.is-invalid textarea,
+.ui-field.is-invalid .ui-affix {
+  border-color: var(--error);
+}
+
+/* ---- Groups of choices ---- */
+.ui-group {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ui-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ui-seg,
+.ui-chip {
+  position: relative;
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* [type] raises specificity above the base checkbox and radio rule in style.css. */
+.ui-seg input[type],
+.ui-chip input[type],
+.ui-pick input[type] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.ui-seg span,
+.ui-chip span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 9px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  line-height: 1.25;
+  text-align: center;
+}
+.ui-seg input:checked + span,
+.ui-chip input:checked + span {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+.ui-chip input:checked + span::before {
+  content: "";
+  width: 11px;
+  height: 6px;
+  margin-top: -3px;
+  border: solid #fff;
+  border-width: 0 0 2px 2px;
+  transform: rotate(-45deg);
+}
+.ui-seg input:focus-visible + span,
+.ui-chip input:focus-visible + span,
+.ui-pick input:focus-visible + .ui-pick-body,
+.ui-switch input:focus-visible + .ui-switch-track {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.ui-chip input:disabled + span {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* Larger choices with a line of explanation */
+.ui-picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  gap: 10px;
+}
+.ui-pick {
+  position: relative;
+  display: block;
+  margin: 0;
+  cursor: pointer;
+}
+.ui-pick-body {
+  display: grid;
+  gap: 3px;
+  height: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #fff;
+  align-content: center;
+}
+.ui-pick-body b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ui-pick-body small {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.ui-pick input:checked + .ui-pick-body {
+  border-color: var(--green);
+  background: var(--sage);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+
+/* ---- Switch ---- */
+.ui-switch {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 0;
+  cursor: pointer;
+}
+.ui-switch input[type] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.ui-switch-track {
+  flex: none;
+  width: 46px;
+  height: 28px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: #7d887f;
+  transition: background 0.14s;
+}
+.ui-switch-track::after {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: 3px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.14s;
+}
+.ui-switch input:checked + .ui-switch-track {
+  background: var(--green);
+}
+.ui-switch input:checked + .ui-switch-track::after {
+  transform: translateX(18px);
+}
+.ui-switch-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding-top: 4px;
+}
+.ui-switch-text b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ui-switch-text small {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* ---- "More options" ---- */
+.ui-more {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.ui-more > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 0;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--green);
+  cursor: pointer;
+  list-style: none;
+}
+.ui-more > summary::-webkit-details-marker {
+  display: none;
+}
+.ui-more > summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin: 0 4px 0 2px;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(-45deg);
+  transition: transform 0.14s;
+}
+.ui-more[open] > summary::before {
+  transform: rotate(45deg);
+}
+.ui-more-body {
+  display: grid;
+  gap: var(--s4);
+  padding: 4px 0 var(--s4);
+}
+
+/* ---- Callouts, status, empty states ---- */
+.ui-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--sage);
+  color: var(--ink);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+.ui-note > :first-child {
+  flex: none;
+  margin-top: 1px;
+}
+.ui-note p {
+  margin: 0;
+}
+.ui-note p + p {
+  margin-top: 6px;
+}
+.ui-note--warn {
+  background: var(--amber);
+  color: #4a3812;
+}
+.ui-note--error {
+  background: var(--error-bg);
+  color: var(--error);
+}
+.ui-note--plain {
+  background: transparent;
+  border: 1px solid var(--line);
+}
+.ui-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--sage);
+  color: #24493a;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.ui-status--due {
+  background: var(--amber);
+  color: var(--amber-ink);
+}
+.ui-status--muted {
+  background: #ecede6;
+  color: var(--muted);
+}
+.ui-status--error {
+  background: var(--error-bg);
+  color: var(--error);
+}
+.ui-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.ui-empty h3 {
+  margin: 0;
+  font-size: 1.0625rem;
+  color: var(--ink);
+}
+.ui-empty p {
+  margin: 0;
+  max-width: 34em;
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+.ui-empty svg {
+  color: var(--green);
+}
+
+/* ---- Layout helpers ---- */
+.ui-stack {
+  display: grid;
+  gap: var(--s4);
+  min-width: 0;
+}
+.ui-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s4);
+  align-items: start;
+}
+.ui-grid > .ui-wide {
+  grid-column: 1 / -1;
+}
+.ui-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+}
+.ui-foot > .ui-foot-start {
+  margin-right: auto;
+}
+.ui-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--green);
+}
+.ui-danger {
+  border-color: #d9b3ad;
+  background: #fff;
+  color: var(--error);
+}
+@media (max-width: 700px) {
+  .ui-grid {
+    grid-template-columns: 1fr;
+  }
+  .ui-picks {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 400px) {
+  .ui-picks {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-switch-track,
+  .ui-switch-track::after,
+  .ui-more > summary::before {
+    transition: none;
+  }
+}
+
+/* Inside dialogs the base stylesheet spaces every paragraph (#dialog-body p). Kit paragraphs keep their own spacing. */
+#dialog-body .ui-help {
+  margin: -3px 0 0;
+}
+#dialog-body .ui-error,
+#dialog-body .ui-note p,
+#dialog-body .ui-empty p {
+  margin: 0;
+}
+#dialog-body .ui-note p + p {
+  margin-top: 6px;
+}

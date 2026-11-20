@@ -1,6 +1,7 @@
 * text=auto eol=lf
 *.cmd text eol=crlf
 pdf-font.js -text
+legal-assets/*.pdf.js -text
 dist/** -text
 *.png binary
 *.pdf binary

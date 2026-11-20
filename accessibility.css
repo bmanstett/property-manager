@@ -1,8 +1,10 @@
-/* Retain a full, non-overlapping pointer target on compact controls. */
-button.hero-open,
-button.avatar {
-  width: 44px;
-  height: 44px;
+/* Loaded last. Rules here keep touch targets, zoom and reading comfort intact whatever the
+   other stylesheets do. Tested by accessibility-tests.cjs at 375px wide and at 200% zoom. */
+
+/* Every control keeps a full 44px target that never overlaps its neighbour. */
+button.icon-button,
+button.avatar,
+button.hero-btn {
   min-width: 44px;
   min-height: 44px;
 }
@@ -11,25 +13,41 @@ button.avatar {
   min-width: 44px;
 }
 
+summary {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Each chart bar is its own target; the chart scrolls sideways rather than squeezing them. */
 .chart-area {
-  grid-template-columns: 35px minmax(0, 1fr);
   overflow-x: auto;
 }
 
 .bar-group {
   flex: 1 0 44px;
-  min-width: 44px;
   width: auto;
+  min-width: 44px;
+}
+
+/* Long names and amounts wrap instead of pushing the page sideways. */
+#content,
+#dialog-body {
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 700px) {
-  .period-select select {
+  /* iOS zooms the page when a focused field uses text smaller than 16px. */
+  input:not([type="checkbox"], [type="radio"], [type="file"]),
+  select,
+  textarea {
     font-size: 1rem;
   }
+}
 
-  .overview-toolbar {
-    flex-wrap: wrap;
-    column-gap: 8px;
-    row-gap: 0;
+@media (forced-colors: active) {
+  .backup-dot,
+  .bars i,
+  .legend i {
+    forced-color-adjust: none;
   }
 }

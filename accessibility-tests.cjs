@@ -84,19 +84,25 @@ test('accessibility at mobile width and native browser zoom',async t=>{
       await page.locator('[data-nav="'+n+'"]:visible').first().click();
       await audit(label+' '+n);
     }
-    for(const act of ['payment','expense','inspect-new','compose','create','import','storage']){
+    // An action opens a dialog, or a page of its own inside a section (the lease builder). Both are audited.
+    async function open(act){
       await page.evaluate(act=>PM.action(act),act);
-      await page.locator('dialog[open]').waitFor();await audit(label+' '+act);
-      await page.keyboard.press('Escape');
+      await page.waitForFunction(()=>document.querySelector('dialog[open]')||PM.route());
+      await audit(label+' '+act);
+      if(await page.locator('dialog[open]').count()){await page.keyboard.press('Escape');await page.evaluate(()=>PM.close());}
+      else await page.evaluate(()=>PM.navigate('Home'));
     }
+    for(const act of ['payment','expense','inspect-new','compose','create','import','storage'])await open(act);
+    // The shell's own dialogs: rentals, setup, property, tenant and rent, settings, help, search, attention, month.
+    for(const act of ['properties','setup','property','property-edit','edit-property','rent-change','new-household','settings','help','install','search','attention','month'])await open(act);
   }
   await page.setViewportSize({width:375,height:812});await routine('375px');
   await page.locator('[data-nav=Home]:visible').first().click();
   const opener=page.locator('[data-act=payment]:visible').first();await opener.click();
   assert.equal(await page.evaluate(()=>document.activeElement.id),'dialog-close');
   const tree=await client.send('Accessibility.getFullAXTree');
-  assert.ok(tree.nodes.some(n=>n.role?.value==='dialog'&&n.name?.value==='Record payment'&&n.properties?.some(p=>p.name==='modal'&&p.value.value)));
-  assert.ok(tree.nodes.some(n=>n.role?.value==='textbox'&&n.name?.value==='Account'));
+  assert.ok(tree.nodes.some(n=>n.role?.value==='dialog'&&n.name?.value==='Record rent payment'&&n.properties?.some(p=>p.name==='modal'&&p.value.value)));
+  assert.ok(tree.nodes.some(n=>n.role?.value==='textbox'&&n.name?.value==='Amount received'));
   await page.keyboard.press('Tab');
   assert.ok(await page.evaluate(()=>document.querySelector('dialog').contains(document.activeElement)));
   await page.keyboard.press('Escape');assert.ok(await opener.evaluate(el=>el===document.activeElement));
