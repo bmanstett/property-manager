@@ -33,27 +33,36 @@ test('Installed rental ledger, receipts, bank matching, reconciliation and CPA d
   await t.test('first offline expense and three retained receipt images',async()=>{
     await doMoney('receipt');await page.locator('#mf-files').setInputFiles(images);
     await page.waitForFunction(()=>PM.records('document').filter(d=>d.receiptInbox).length===3);
-    await field('vendor').fill('Three image vendor');await field('amount').fill('79.21');await field('category0').selectOption('repairs');
-    await field('notes').fill('Synthetic inspection repair');await save('Save expense');
+    await page.locator('#mf-receipts .mf-thumb').nth(2).waitFor();assert.equal(await page.locator('#mf-receipts [data-remove-doc]').count(),3);
+    await field('vendor').fill('Three image vendor');await field('amount').fill('79.21');
+    await save('Save expense');assert.match(await page.locator('#mf-form .ui-error:visible').first().innerText(),/Choose what it was for/);
+    await field('catPick0').and(page.locator('[value=repairs]')).check();assert.equal(await field('category0').inputValue(),'repairs');
+    await page.locator('#mf-form > details > summary').click();await field('notes').fill('Synthetic inspection repair');await save('Save expense');
     await page.waitForFunction(()=>PM.records('expense').some(e=>e.vendor==='Three image vendor'));
     const result=await page.evaluate(async()=>{const t=PM.records('expense').find(e=>e.vendor==='Three image vendor');return {amount:t.amount,docs:await Promise.all(t.attachments.map(async id=>{const doc=PM.get(id);return {id:doc.transactionId,name:doc.name,tail:await(await PM.file(doc.hash)).slice(-9).text()};})),id:t.id};});
     assert.equal(result.amount,7921);assert.equal(result.docs.length,3);
     assert.deepEqual(result.docs.map(d=>d.tail),['fixture 1','fixture 2','fixture 3']);assert.ok(result.docs.every(d=>d.id===result.id));
-    await page.getByRole('button',{name:/Three image vendor/}).first().click();await doMoney('reclass');await field('category0').selectOption('maintenance');await field('reason').fill('Reviewed vendor service details');await save('Save corrected categories');await page.waitForFunction(()=>PM.records('expense').some(e=>e.categoryHistory?.length));
+    await page.getByRole('button',{name:/Three image vendor/}).first().click();await doMoney('reclass');await field('catPick0').and(page.locator('[value=maintenance]')).check();await field('reason').fill('Reviewed vendor service details');await save('Save category');await page.waitForFunction(()=>PM.records('expense').some(e=>e.categoryHistory?.length));
   });
   await t.test('repeat a CSV, confirm bank match, reconcile opening and closing balances',async()=>{
     await doMoney('tab:reconcile');
     const source={name:'Checking.csv',mimeType:'text/csv',buffer:Buffer.from('date,description,amount,id\r\n'+date+',Rent payment,3200.00,BANK-001\r\n')};
-    async function upload(count){await doMoney('csv');await field('statement').setInputFiles(source);await save('Map columns');await field('refCol').selectOption('3');await save('Preview lines');await save('Import '+count+' bank lines');await page.waitForFunction(()=>!document.querySelector('dialog[open]'));}
+    // One dialog: the columns, including the bank's own ID, are worked out from the file.
+    async function upload(count){await doMoney('csv');await field('statement').setInputFiles(source);await save(count?'Import '+count+' transaction'+(count===1?'':'s'):'Done');await page.waitForFunction(()=>!document.querySelector('dialog[open]'));}
     await upload(1);const original=await page.evaluate(()=>PM.records('payment').length);
-    await doMoney('match');const matching=await page.evaluate(day=>PM.records('payment').find(r=>r.date===day).id,date);
-    await field('candidate').selectOption(matching);await save('Confirm match');await page.waitForFunction(()=>PM.records('bankline')[0].matchedId);
+    assert.equal(await page.evaluate(()=>PM.records('bankline')[0].reference),'BANK-001');
+    // The line is offered with the one entry it clearly is; one tap confirms it.
+    const matching=await page.evaluate(day=>PM.records('payment').find(r=>r.date===day).id,date);
+    await doMoney('matchyes');await page.waitForFunction(()=>PM.records('bankline')[0].matchedId);
+    assert.equal(await page.evaluate(()=>PM.records('bankline')[0].matchedId),matching);
     await upload(0);assert.equal(await page.evaluate(()=>PM.records('bankline').length),1);assert.equal(await page.evaluate(()=>PM.records('payment').length),original);
-    await doMoney('reconcile');await field('start').fill(date);await field('end').fill(date);await field('opening').fill('1250.00');await field('closing').fill('4450.00');await save('Save reconciliation');await page.waitForFunction(()=>PM.records('reconciliation').length===1);
+    await doMoney('reconcile');await field('start').fill(date);await field('end').fill(date);await field('opening').fill('1250.00');await field('closing').fill('4450.00');await save('Save statement check');await page.waitForFunction(()=>PM.records('reconciliation').length===1);
     assert.equal(await page.evaluate(()=>PM.records('reconciliation')[0].difference),0);
   });
   await t.test('generate and download real CPA archive with matching immutable snapshot',async()=>{
-    await doMoney('cpa');await save('Review packet');const download=page.waitForEvent('download');await save('Generate preliminary ZIP');const result=await download;
+    // One step. The year is chosen explicitly so the test also passes from January to April, when last year is offered first.
+    await doMoney('tab:reports');await doMoney('cpa');const year=page.locator('#mf-form [name=year][value="'+date.slice(0,4)+'"]');if(await year.count())await year.check();
+    const download=page.waitForEvent('download');await save('Create packet');const result=await download;
     const data=fs.readFileSync(await result.path());assert.equal(data.readUInt32LE(0),0x04034b50);assert.ok(data.includes(Buffer.from('Annual-summary.pdf')));
     if(process.env.PM_FINANCE_QA_DIR){
       let pos=0;
@@ -71,7 +80,7 @@ test('Installed rental ledger, receipts, bank matching, reconciliation and CPA d
   await t.test('return part of a posted rent receipt through its detail view and retain the previously exported ZIP',async()=>{
     await close();await doMoney('tab:activity');const original=await page.evaluate(day=>PM.records('payment').find(t=>t.date===day).id,date);
     await page.locator('[data-money="activity"][data-id="'+original+'"]').click();await doMoney('rentRefund');
-    await field('amount').fill('126.75');await field('reason').fill('Documented partial return');await save('Post rent return');
+    await field('amount').fill('126.75');await field('reason').fill('Documented partial return');await save('Save refund');
     await page.waitForFunction(()=>PM.records('payment').some(r=>r.kind==='rentRefund'&&r.amount===-12675));
     assert.equal(await page.evaluate(()=>Money.home().outstanding),12675);
     assert.equal(await page.evaluate(id=>PM.get(id).amount,original),320000);

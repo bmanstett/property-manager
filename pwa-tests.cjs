@@ -97,7 +97,6 @@ test('installed rental workflows and release lifecycle',async t=>{
       await action('payment');
       const f=page.locator('#mf-form');
       await f.locator('[name=amount]').fill(value);
-      await f.locator('input[name^="allocation:"]').first().fill(value);
       await f.locator('[type=submit]').click();
       await page.waitForFunction(expected=>Money.home().outstanding===expected,outstanding);
     }
@@ -106,7 +105,7 @@ test('installed rental workflows and release lifecycle',async t=>{
     const f=page.locator('#mf-form');
     await f.locator('[name=vendor]').fill('Offline receipt test');
     await f.locator('[name=amount]').fill('83.50');
-    await f.locator('[name=category0]').selectOption('repairs');
+    await f.locator('[name=catPick0][value=repairs]').check();
     await f.locator('#mf-files').setInputFiles([0,1,2].map(i=>({name:'image-'+i+'.png',mimeType:'image/png',buffer:Buffer.concat([immutable['assets/icon-192.png'],Buffer.from([i])])})));
     await page.waitForFunction(()=>PM.records('document').filter(r=>r.receiptInbox).length===3);
     await f.locator('[type=submit]').click();
@@ -114,13 +113,25 @@ test('installed rental workflows and release lifecycle',async t=>{
     assert.deepEqual(await page.evaluate(()=>[PM.records('expense').length,PM.records('expense')[0].attachments.length,Money.home().expenses]),[1,3,8350]);
   });
 
-  await t.test('prepare a draft lease packet, queue correspondence, cancel mail handoff, finish inspection offline',async()=>{
+  await t.test('write and finalize a lease offline with its bundled booklets, queue correspondence, cancel mail handoff, finish inspection offline',async()=>{
     await action('create');
-    await page.locator('.ls-steps [data-ref="5"]').click();
-    await page.locator('[data-lease="generate"]').click();
-    await page.waitForFunction(()=>PM.records('leasePacket').length===1);
-    const packet=await page.evaluate(()=>{const p=PM.records('leasePacket')[0];return [p.mode,p.immutable,p.review.some(r=>r.status==='More information needed')];});
-    assert.deepEqual(packet,['draft',true,true]);await dialogClose();
+    await page.locator('.lb #lb-step-title').waitFor();
+    assert.equal(await page.locator('.lb .lb-caption').textContent(),'Step 1 of 6 · Home');
+    await page.locator('.lb .lb-back').click();await page.locator('.lh').waitFor();
+    // Every answer at once (the builder itself is covered in lease-tests.cjs), then back in at the last step.
+    const draft=await page.evaluate(async()=>{
+      const d=PM.records('lease')[0],today=PM.today(),start=PM.addDays(today,20);
+      const saved=await PM.save('lease',{...d,step:5,tenants:[{id:PM.uid(),name:'Synthetic Tenant',email:'',phone:''}],facts:{...d.facts,premises:'12 Offline Way',zip:'92101',inCity:'yes',unitType:'apartment',buildingUnits:'5-15',built:'1972',ownerKind:'people',landlord:'Synthetic Owner',noticeAddress:'410 Example Street, San Diego, CA 92103',noticePhone:'619-555-0100',termStart:start,start,end:PM.addDays(LeaseLaw.addYears(start,1),-1),rent:'3000',deposit:'1500',util_electric:'tenant',util_gas:'tenant',util_water:'landlord',util_sewer:'landlord',util_trash:'landlord',util_internet:'tenant',floodKnown:'no',leadKnown:'no',leadRecords:'no',rareReviewed:'yes'}});
+      await Leases.open('lease',saved.id);return saved.id;
+    });
+    await page.waitForFunction(()=>document.querySelector('.lb .lb-caption')?.textContent==='Step 6 of 6 · Review & sign');
+    assert.deepEqual(await page.locator('.lb .lb-needs li').allInnerTexts(),[]);
+    await page.locator('.lb input[name="lease:reviewed"]').check();
+    await page.locator('.lb [data-lease="finalize"]').click();
+    await page.locator('.lp-page .lp-head').waitFor({timeout:20000});
+    assert.equal(await page.locator('.lp-page .lp-head .ui-status').innerText(),'Ready to sign');
+    const packet=await page.evaluate(()=>{const p=PM.records('leasePacket')[0];return [PM.records('leasePacket').length,p.mode,p.immutable,p.leaseId,PM.get(p.contractId).mime,PM.get(p.archiveId).mime,p.attachments.map(a=>a.path.split('/')[0]).join()];});
+    assert.deepEqual(packet,[1,'final',true,draft,'application/pdf','application/zip','handouts,handouts,handouts']);await dialogClose();
     await action('compose');
     await page.locator('#mail-form [name=to]').fill('synthetic@example.invalid');
     await page.locator('#mail-form button[value=ready]').click();
@@ -140,7 +151,6 @@ test('installed rental workflows and release lifecycle',async t=>{
 
   await t.test('produce local CPA export, reopen and preserve records across deliberate software update',async()=>{
     await action('cpa');
-    await page.locator('#mf-form [type=submit]').click();
     const submit=page.locator('#mf-form [type=submit]');
     await submit.waitFor();
     const checkboxes=page.locator('#mf-form input[type=checkbox]');

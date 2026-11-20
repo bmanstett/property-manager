@@ -221,4 +221,77 @@ test('local vault, authenticated transfer and file exports',async t=>{
       t.diagnostic(execFileSync(python,['-c',script,file],{encoding:'utf8'}).trim());
     }finally{fs.rmSync(base,{recursive:true,force:true});}
   });
+
+  await t.test('backup status in plain words, local dates and staleness, with no other script loaded',async()=>{
+    // San Diego time. 7:43 PM on November 18 there is already November 19 in UTC.
+    const pacific=await browser.newContext({timezoneId:'America/Los_Angeles',locale:'en-US'}),tab=await pacific.newPage();
+    await tab.goto(url);
+    const r=await tab.evaluate(async pwd=>{
+      const now=new Date('2026-11-19T04:10:00.000Z'),evening='2026-11-19T03:43:25.000Z';
+      const say=(status,extra)=>Store.describe(status,{dataset:'owner',records:5,repository:'',now,...extra});
+      const words={
+        today:Store.when(evening,{now}),
+        yesterday:Store.when('2026-11-18T03:43:25.000Z',{now}),
+        dayOnly:Store.when(evening,{now,time:false}),
+        earlier:Store.when('2026-11-03T20:00:00.000Z',{now}),
+        lastYear:Store.when('2025-11-03T20:00:00.000Z',{now}),
+        none:Store.when(null,{now}),
+      };
+      const old='2026-10-20T20:00:00.000Z';
+      const states={
+        sample:Store.describe({lastBackup:evening},{dataset:'sample',records:5,now}),
+        empty:say({},{records:0}),
+        never:say({}),
+        unfinished:say({lastCreated:evening}),
+        // The file from "Back up now" may already be saved: the reminder leads to where that can be said.
+        unfinishedFile:say({lastCreated:evening,createdRevision:3},{fileMade:true}),
+        // A second file made after a confirmed backup changes nothing while no record has changed.
+        redundantFile:say({lastBackup:old,lastCreated:evening,changes:0}),
+        unfinishedAgain:say({lastBackup:old,lastCreated:evening,changes:2}),
+        brought:say({lastTransfer:evening}),
+        broughtLongAgo:say({lastTransfer:old}),
+        current:say({lastBackup:evening,changes:0}),
+        recent:say({lastBackup:evening,changes:1}),
+        behindByCount:say({lastBackup:evening,changes:5}),
+        behindByAge:say({lastBackup:old,changes:1}),
+        syncing:say({lastBackup:old,changes:9},{repository:'pat/rental-backup'}),
+      };
+      // Real records: a file that is made but not marked as saved is not a backup.
+      await Store.save('owner',[{type:'property',id:'p',name:'Status test'}]);
+      const first=(await Store.status('owner')).summary.state;
+      const saved=await Store.makeBackup('owner',pwd);
+      const pending=await Store.status('owner');
+      await Store.confirmBackup('owner',saved.revision);
+      const s=await Store.status('owner'),d=new Date(s.lastBackup),two=n=>String(n).padStart(2,'0');
+      return {words,states,first,pending:[pending.summary.state,pending.lastBackup],
+        after:[s.summary.state,s.summary.headline,s.records,s.changes],
+        // The time handed to screens starts with the local calendar date and is still the same moment.
+        localDay:s.lastBackup.slice(0,10)===d.getFullYear()+'-'+two(d.getMonth()+1)+'-'+two(d.getDate()),
+        sameMoment:Math.abs(d-Date.now())<60000,offset:/[+-]\d\d:\d\d$/.test(s.lastBackup)};
+    },password);
+    await pacific.close();
+    assert.deepEqual(r.words,{today:'today at 7:43 PM',yesterday:'yesterday at 7:43 PM',dayOnly:'today',earlier:'Nov 3',lastYear:'Nov 3, 2025',none:''});
+    const brief=Object.fromEntries(Object.entries(r.states).map(([k,v])=>[k,[v.state,v.kind,v.headline,v.detail,v.needsAction,v.actionLabel]]));
+    assert.deepEqual(brief,{
+      sample:['sample','muted','Sample property','Nothing here needs a backup.',false,''],
+      empty:['empty','muted','Nothing to back up yet','Add your rental and it will appear here.',false,''],
+      never:['never','due','Not backed up yet','Your records exist only on this device.',true,'Back up now'],
+      unfinished:['unfinished','due','Backup started today at 7:43 PM, not finished','Back up or sync again to finish.',true,'Back up now'],
+      unfinishedFile:['unfinished','due','Backup started today at 7:43 PM, not finished','If you saved that file, say so. If not, back up again.',true,'Finish backup'],
+      redundantFile:['current','ok','Backed up','Oct 20',false,''],
+      unfinishedAgain:['unfinished','due','Backup started today at 7:43 PM, not finished','Back up or sync again to finish.',true,'Back up now'],
+      brought:['brought','ok','Brought in from your other device today at 7:43 PM','Not yet backed up from this device.',false,''],
+      broughtLongAgo:['brought','due','Brought in from your other device Oct 20','Not yet backed up from this device.',true,'Back up now'],
+      current:['current','ok','Backed up','Today at 7:43 PM',false,''],
+      recent:['recent','ok','Backed up today at 7:43 PM','1 change since then',false,''],
+      behindByCount:['behind','due','Backup needed','5 changes since today at 7:43 PM',true,'Back up now'],
+      behindByAge:['behind','due','Backup needed','1 change since Oct 20',true,'Back up now'],
+      syncing:['behind','due','Backup needed','9 changes since Oct 20',true,'Sync now'],
+    });
+    assert.equal(r.states.syncing.action,'sync-now');assert.equal(r.states.never.action,'backup');assert.equal(r.states.unfinishedFile.action,'storage');
+    assert.equal(r.states.behindByAge.short,'Backup needed: 1 change since Oct 20');
+    assert.equal(r.first,'never');assert.deepEqual(r.pending,['unfinished',null]);
+    assert.deepEqual(r.after,['current','Backed up',1,0]);
+    assert.ok(r.localDay&&r.sameMoment&&r.offset);
+  });
 });

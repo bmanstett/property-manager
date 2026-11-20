@@ -7,18 +7,25 @@ const assert = require("node:assert/strict"),
   test = require("node:test");
 const appFiles = new Set([
   "index.html",
+  "ui.css",
+  "ui.js",
+  "lease-law.js",
+  "lease-clauses.js",
+  "lease-document.js",
+  "lease-packets.js",
+  "lease-sign.css",
   "style.css",
   "accessibility.css",
   "money.css",
   "lease.css",
+  "records.css",
+  "backup.css",
   "icons.js",
   "export.js",
   "storage.js",
   "github-sync.js",
   "money.js",
   "leases.js",
-  "lease-notices.js",
-  "rules.js",
   "pdf-font.js",
   "records.js",
   "app.js",
@@ -180,7 +187,7 @@ if (process.argv.includes("--preview")) {
         }))
           await f.locator('[name="' + n + '"]').fill(v);
         await f
-          .getByRole("button", { name: "Create rental workspace" })
+          .getByRole("button", { name: "Save my rental" })
           .click();
         await page.waitForFunction(
           () => PM.dataset() === "owner" && PM.records("charge").length > 0,
@@ -196,7 +203,6 @@ if (process.argv.includes("--preview")) {
           await clickAct("payment");
           const f = page.locator("#mf-form");
           await f.locator("[name=amount]").fill(n);
-          await f.locator('[name^="allocation:"]').first().fill(n);
           await f.getByRole("button", { name: "Save payment" }).click();
           await page.waitForFunction(
             (x) => Money.home().outstanding === x,
@@ -224,7 +230,7 @@ if (process.argv.includes("--preview")) {
         await page.locator("#import-files").setInputFiles(sample);
         await page.locator("#commit-docs").waitFor();
         await page
-          .getByRole("button", { name: "Import reviewed files" })
+          .getByRole("button", { name: "Save document" })
           .click();
         await page
           .getByRole("button", { name: /original-report\.txt/ })
@@ -241,7 +247,7 @@ if (process.argv.includes("--preview")) {
         await close();
         await clickAct("import");
         await page.locator("#import-files").setInputFiles(sample);
-        await page.getByText(/Identical file already seen/).waitFor();
+        await page.getByText(/Already saved/).waitFor();
         assert.equal(await page.locator("[name=use0]").isChecked(), false);
         await close();
       },
@@ -257,18 +263,22 @@ if (process.argv.includes("--preview")) {
         await page
           .locator("#inspection-form [name=title]")
           .fill("Fall inspection");
-        await page.locator("[name=cond0]").selectOption("Ordinary wear");
+        await page.locator('[name=cond0][value="Ordinary wear"]').check();
         await page.locator("[name=note0]").fill("Small floor scuff");
         await page
-          .getByRole("button", { name: "Complete inspection", exact: true })
+          .getByRole("button", { name: "Finish inspection", exact: true })
           .click();
         await page
-          .getByRole("button", { name: "Save completed snapshot" })
+          .getByRole("button", { name: "Finish and lock" })
           .click();
         await page.getByRole("button", { name: /Fall inspection/ }).click();
-        await page.getByRole("button", { name: "Create revision" }).click();
+        await page
+          .getByRole("button", { name: "Add a correction or follow-up" })
+          .click();
         await page.locator("[name=note0]").fill("Follow-up complete");
-        await page.getByRole("button", { name: "Save progress" }).click();
+        await page
+          .getByRole("button", { name: "Save and finish later" })
+          .click();
         await clickAct("compare");
         assert.equal(await page.locator("#side-0,#side-1").count(), 2);
         await close();
@@ -285,12 +295,11 @@ if (process.argv.includes("--preview")) {
       "outbox retains attachment versions and canceled native share stays ready",
       async () => {
         await nav("Tasks");
-        await page.getByRole("button", { name: "Outbox", exact: true }).click();
+        await page.getByRole("button", { name: "Emails", exact: true }).click();
         await clickAct("compose");
         await page.locator("[name=to]").fill("renter@example.invalid");
-        await page.locator("#mail-form details summary").click();
         await page.locator("[name=attachment]").first().check();
-        await page.getByRole("button", { name: "Review for outbox" }).click();
+        await page.getByRole("button", { name: "Review and send" }).click();
         await page.locator("#recipient-ok").check();
         await page.locator("#mail-ready").click();
         await page.waitForFunction(
@@ -331,6 +340,7 @@ if (process.argv.includes("--preview")) {
           await nav("Home");
           await clickAct("property");
           await page
+            .locator("dialog[open]")
             .getByRole("button", { name: /Synthetic household/ })
             .click();
         };
@@ -381,7 +391,10 @@ if (process.argv.includes("--preview")) {
           .locator("#rental-details [name=household]")
           .fill("Successor household");
         await page.locator("#rental-details [name=start]").fill(due);
-        await page.getByRole("button", { name: "Save rental details" }).click();
+        await page
+          .locator("#rental-details")
+          .getByRole("button", { name: "Add tenant" })
+          .click();
         await page.waitForFunction(() => PM.records("tenancy").length === 2);
       },
     );

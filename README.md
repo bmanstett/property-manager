@@ -1,42 +1,55 @@
 # Property Manager
 
-A buildless rental workspace for Windows and iPhone. Open the installed app to see rent status, expenses, deadlines and backup status for the selected property. The first launch opens **Juniper House**, a fictional property with its own dataset. Choose the property name in the top bar and select **Set up my rental** to start entering owner records.
+A private rental workspace for Windows and iPhone. It keeps rent, expenses, leases, documents and to-dos for your rental, works without an internet connection, and stores everything on your own device.
 
-## Using the app
+The first launch opens **Juniper House**, a sample rental with made-up data, so you can look around. Choose **Set up my rental** on the banner to start your own records.
 
-- **Home** opens the records behind each amount. Choose a month to review its operating results or open a deadline to act on it.
-- **Money** separates rent charges, cash receipts, deposit liability and operating expense. Link payments to household charges, retain receipt originals, match bank CSV rows, and reconcile a statement. **Prepare CPA packet** previews unresolved items before saving a versioned ZIP. [Financial behavior and IRS sources](MONEY.md)
-- **Leases** saves drafts at each stage, evaluates a versioned California rule register and exports exact packet files. The draft assembler and the attorney-reviewed execution path have separate outputs. Record each signer’s returned evidence, then designate the executed copy. [Legal source register and package updates](LEGAL.md)
-- **Documents** reviews selected files or folders before storing originals. Inspect names, metadata, hashes and duplicate warnings. PDF, supported image and text previews have a download fallback. Review file contents manually when collecting lease facts. The app performs no OCR, DOCX extraction or automated contract interpretation.
-- **Tasks** covers reminders, maintenance, room inspections, photo comparisons and the tenant email outbox. Queue an email offline, review the exact recipients and attachment versions, then hand it to a mail app. Owner confirmation records actual sending. Calendar files are available for dated tasks and messages.
-- **Backup & transfer** creates password-encrypted snapshots. Each device has an independent local database. Restore replaces one selected dataset after validation. Merge compares revisions and presents conflicts. [Backup, restore and device transfer](BACKUP.md)
-- **Settings → GitHub sync** downloads or uploads an encrypted owner snapshot in your private data repository. Review changes and resolve conflicts before you sync a second device. [Connect your data repository](BACKUP.md#sync-personal-records-with-github)
+## What each section is for
 
-## Delivery
+- **Home** shows today at a glance: this month's rent, what needs your attention, and one-tap shortcuts for the things you do most.
+- **Money** tracks rent, bills, the security deposit and taxes. Record a rent payment, add an expense or snap a receipt, match your bank statement, and prepare a year-end packet for your accountant. [How the numbers work](MONEY.md)
+- **Leases** writes a complete California lease for a home in the City of San Diego. Answer six short steps, pick from recommended clauses, add your own, watch the real document take shape, then download the PDF and record the signed copy. [What the lease builder covers](LEGAL.md)
+- **Documents** keeps your files, receipts and photos, with the originals preserved.
+- **Tasks** holds reminders, repairs, move-in and move-out inspections with photos, and emails to your tenant.
+- **Backup** saves a password-protected copy of everything, restores it on another device, and can keep an encrypted copy in your own private GitHub repository. [Backup, restore and moving between devices](BACKUP.md)
 
-The workspace root contains the complete source. The `dist` folder and `Property-Manager-static.zip` contain the installable public assets. HTTPS installation requires an initial connection. An owner can run the installed app without Node, a package manager, a subscription or a backend. [Windows, iPhone and static hosting](INSTALL.md)
+## The lease builder
 
-The included GitHub Actions workflow builds the release and publishes its approved assets to GitHub Pages. [Publish on GitHub Pages](INSTALL.md#publish-on-github-pages)
+1. **Home**: the address, the kind of home, when it was built and who owns it. From these the builder works out which California and San Diego rules apply and tells you in plain words.
+2. **People**: the landlord, where notices go, and the tenants.
+3. **Rent & term**: dates, rent, deposit (checked against California's limit), how rent is paid, utilities and appliances.
+4. **Rules**: recommended clauses as cards you switch on or off (pets, smoking, renters insurance, guests, parking and more), each with its exact wording. Add your own clauses; the builder warns about wording California does not allow.
+5. **Disclosures**: the notices the law requires are added for you, with a few yes-or-no questions.
+6. **Review & sign**: a checklist of anything missing, then **Finalize lease**. You get the lease as a PDF with the required handouts, and a simple page to record the signed copy.
 
-The published release contains application files, public handouts and fictional demo data. The source allowlist excludes local inventories, rental records, exports and backup files. Owner records enter the private backup repository when the owner chooses GitHub sync.
+The builder follows California and City of San Diego requirements as reviewed on November 18, 2026. It is not legal advice. [Sources, coverage and limits](LEGAL.md)
 
-## Implementation and licenses
+## Installing
 
-| Source | Responsibility |
+The ready-to-use app is in `dist/` and `Property-Manager-static.zip`. It needs only a browser: no account, subscription or server. On Windows, double-click **Open Property Manager.cmd**. [Windows, iPhone and hosting instructions](INSTALL.md)
+
+Your records stay in the browser on your device. Nothing is uploaded unless you make a backup or turn on sync. Browsers can clear stored data when a device runs low on space, so keep a recent backup somewhere else.
+
+## For maintainers
+
+The app is plain HTML, CSS and JavaScript with no build step and no third-party runtime code.
+
+| Files | Responsibility |
 | --- | --- |
-| `index.html`, `app.js`, `icons.js`, CSS | Navigation, property selection, setup, dashboard, dialogs, accessible controls and icons |
-| `money.js` | Shared integer-cent ledger, scheduled obligations, bank matching, reconciliation, CSV and CPA reporting |
-| `rules.js`, `leases.js`, `legal-assets/` | Versioned declarative rules, applicability review, draft generation, packet and signature history |
-| `records.js` | Original-file review, metadata, inspections, maintenance and correspondence |
-| `storage.js` | IndexedDB schema migration, revisions, merge, encrypted archive verification and atomic restore |
-| `export.js`, `pdf-font.js` | Project-local selectable-text PDF and ZIP writers. PDF text uses locally bundled Liberation Sans under the SIL Open Font License. [Font license](LICENSE-Liberation.txt) |
-| `manifest.webmanifest`, `sw.js`, `assets/` | Install metadata, offline cache, original icon design and bundled house illustration |
-| `build-static.cjs`, `sw-template.js` | Optional maintainer tooling for producing a byte-verified static release |
+| `index.html`, `app.js`, `icons.js`, `style.css`, `accessibility.css` | Navigation, Home, setup, property and tenant details, settings, help, search |
+| `ui.js`, `ui.css` | Shared design tokens and form components (fields with help text, pill choices, switches, notes) |
+| `money.js`, `money.css` | Integer-cent ledger, rent schedule, payments, expenses, bank matching, reconciliation, tax packet |
+| `lease-law.js` | Statutory notice texts, the rules that decide which apply, bundled handouts, source list |
+| `lease-clauses.js` | Recommended and optional clause library, custom-clause warnings |
+| `lease-document.js` | Builds the lease document from the answers |
+| `leases.js`, `lease.css` | Leases workspace and the six-step builder |
+| `lease-packets.js`, `lease-sign.css` | Finalized leases, signing records, history, deposit return, import checks |
+| `records.js`, `records.css` | Documents, tasks, inspections, tenant email |
+| `storage.js`, `github-sync.js`, `backup.css` | Local database, revisions, encrypted backup and restore, merge, GitHub sync |
+| `export.js`, `pdf-font.js` | PDF and ZIP writers. PDFs embed Liberation Sans under the SIL Open Font License. [Font license](LICENSE-Liberation.txt) |
+| `manifest.webmanifest`, `sw.js`, `sw-template.js`, `assets/`, `legal-assets/` | Install metadata, offline cache with integrity checks, icons, bundled public handouts (each PDF with a generated `.pdf.js` copy for when the app is opened from a file) |
+| `build-static.cjs` | Produces and verifies `dist/`, `sw.js`, the handout script copies and the ZIP |
 
-Browser storage and application caching are separate. Live records use the device and browser’s access controls. Backup encryption covers metadata and files. The local history, hashes and owner attestations support review. Independent legal proof of service or identity requires appropriate external evidence.
+Run `node build-static.cjs` after changing any app file, then `node build-static.cjs --check`. The included GitHub Actions workflow publishes `dist/` to GitHub Pages. Tests and what they cover are in [TESTING.md](TESTING.md).
 
-The frontend has no third-party JavaScript runtime. The public EPA and San Diego disclosure PDFs retain original agency credits. The source register lists their origins and hashes. Default UI typefaces use locally available system fonts. The bundled house illustration was produced with built-in ImageGen for the synthetic property. Its art direction was a three-quarter California Craftsman bungalow and palms, drawn in fine ivory engraving on a forest-green field, with clear space for property information on the left. File: `assets/juniper-house.png`.
-
-## Verification
-
-[Acceptance test results and device limits](TESTING.md) describe the executed checks. The optional development tests use Node’s built-in test runner, Playwright Core and desktop Chrome. Runtime application files never load these tools.
+The sample house illustration (`assets/juniper-house.png`) was generated for the fictional sample property. The EPA, California Department of Public Health and San Diego Housing Commission handouts keep their original credits.
